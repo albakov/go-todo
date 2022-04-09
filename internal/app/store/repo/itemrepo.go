@@ -49,10 +49,6 @@ func (i *ItemRepo) Create(item model.Item) (model.Item, error) {
 }
 
 func (i *ItemRepo) Update(id int, item model.Item) error {
-	if item.Title == "" {
-		return errors.New("item Title cannot be empty")
-	}
-
 	_, err := i.GetById(id)
 	if err != nil {
 		return err
@@ -62,7 +58,11 @@ func (i *ItemRepo) Update(id int, item model.Item) error {
 
 	for i := 0; i < len(data); i++ {
 		if data[i].Id == id {
-			data[i].Title = item.Title
+			if item.Title != "" {
+				data[i].Title = item.Title
+			}
+
+			data[i].Completed = item.Completed
 		}
 	}
 

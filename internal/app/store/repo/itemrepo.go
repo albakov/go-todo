@@ -9,16 +9,15 @@ import (
 )
 
 type ItemRepo struct {
+	Path string `toml:"path_to_json"`
 }
 
-var path = "/home/izmail/www/go-todo.ru/internal/app/model/items.json"
-
 func (i *ItemRepo) Get() []model.Item {
-	return parseItems()
+	return i.parseItems()
 }
 
 func (i *ItemRepo) GetById(id int) (model.Item, error) {
-	items := parseItems()
+	items := i.parseItems()
 	item := model.Item{}
 
 	for i := 0; i < len(items); i++ {
@@ -35,12 +34,12 @@ func (i *ItemRepo) Create(item model.Item) (model.Item, error) {
 		return item, errors.New("item Title cannot be empty")
 	}
 
-	data := parseItems()
+	data := i.parseItems()
 	count := len(data)
 	item.Id = count + 1
 	data = append(data, item)
 
-	err := saveJson(data)
+	err := i.saveJson(data)
 	if err != nil {
 		return item, err
 	}
@@ -54,7 +53,7 @@ func (i *ItemRepo) Update(id int, item model.Item) error {
 		return err
 	}
 
-	data := parseItems()
+	data := i.parseItems()
 
 	for i := 0; i < len(data); i++ {
 		if data[i].Id == id {
@@ -66,7 +65,7 @@ func (i *ItemRepo) Update(id int, item model.Item) error {
 		}
 	}
 
-	err = saveJson(data)
+	err = i.saveJson(data)
 	if err != nil {
 		return err
 	}
@@ -75,7 +74,7 @@ func (i *ItemRepo) Update(id int, item model.Item) error {
 }
 
 func (i *ItemRepo) Delete(id int) error {
-	data := parseItems()
+	data := i.parseItems()
 
 	for i := 0; i < len(data); i++ {
 		if data[i].Id == id {
@@ -85,7 +84,7 @@ func (i *ItemRepo) Delete(id int) error {
 		}
 	}
 
-	err := saveJson(data)
+	err := i.saveJson(data)
 	if err != nil {
 		return err
 	}
@@ -93,8 +92,8 @@ func (i *ItemRepo) Delete(id int) error {
 	return nil
 }
 
-func parseItems() []model.Item {
-	file, err := ioutil.ReadFile(path)
+func (i *ItemRepo) parseItems() []model.Item {
+	file, err := ioutil.ReadFile(i.Path)
 	if err != nil {
 		return nil
 	}
@@ -110,7 +109,7 @@ func parseItems() []model.Item {
 	return data.Items
 }
 
-func saveJson(data []model.Item) error {
+func (i *ItemRepo) saveJson(data []model.Item) error {
 	type items struct {
 		Items []model.Item `json:"items"`
 	}
@@ -120,7 +119,7 @@ func saveJson(data []model.Item) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(path, file, 0777)
+	err = ioutil.WriteFile(i.Path, file, 0777)
 	if err != nil {
 		return err
 	}

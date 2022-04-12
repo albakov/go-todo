@@ -6,7 +6,7 @@ import (
 )
 
 func Start(config *Config) {
-	srv := apiServer()
+	srv := apiServer(config)
 
 	s := &http.Server{
 		Handler:      srv,

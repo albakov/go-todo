@@ -11,16 +11,18 @@ import (
 )
 
 type apiserver struct {
-	router      *mux.Router
-	store       store.Store
-	allowOrigin string
+	router *mux.Router
+	store  store.Store
+	*Config
 }
 
-func apiServer() *apiserver {
+func apiServer(config *Config) *apiserver {
 	s := &apiserver{
-		router:      mux.NewRouter(),
-		store:       store.Store{},
-		allowOrigin: "http://js-todo.ru.local",
+		router: mux.NewRouter(),
+		store: store.Store{
+			Path: config.Path,
+		},
+		Config: config,
 	}
 	s.setRoutes()
 
@@ -43,7 +45,7 @@ func (s *apiserver) setRoutes() {
 }
 
 func (s *apiserver) respond(w http.ResponseWriter, statusCode int, data interface{}) {
-	w.Header().Set("Access-Control-Allow-Origin", s.allowOrigin)
+	w.Header().Set("Access-Control-Allow-Origin", s.AllowOrigin)
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS, POST, DELETE")
 	w.Header().Set("Content-Type", "application/json")
